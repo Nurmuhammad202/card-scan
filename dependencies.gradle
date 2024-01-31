@@ -49,7 +49,7 @@ ext.versions = [
         material                    : '1.8.0',
         mockito                     : '5.2.0',
         mockitoKotlin               : '4.1.0',
-        okhttp                      : '4.11.0',
+        okhttp                      : '4.12.0',
         okio                        : '3.3.0',
         paparazzi                   : '1.2.0',
         payButtonCompose            : '0.1.3',
