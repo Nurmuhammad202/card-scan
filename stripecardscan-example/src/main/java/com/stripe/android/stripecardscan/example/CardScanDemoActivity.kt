@@ -1,0 +1,42 @@
+package com.stripe.android.stripecardscan.example
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.stripecardscan.cardscan.CardScanSheet
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
+import com.stripe.android.stripecardscan.example.databinding.ActivityCardScanDemoBinding
+import com.stripe.android.stripecardscan.scanui.DetectActivity
+
+class CardScanDemoActivity : AppCompatActivity() {
+    private val viewBinding by lazy {
+        ActivityCardScanDemoBinding.inflate(layoutInflater)
+    }
+
+    private val settings by lazy { Settings(this) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(viewBinding.root)
+
+        val cardScanSheet = CardScanSheet.create(this, settings.publishableKey, ::onScanFinished)
+
+        viewBinding.launchScanButton.setOnClickListener {
+            //cardScanSheet.present()
+            startActivity(Intent(this, DetectActivity::class.java))
+        }
+    }
+
+    private fun onScanFinished(result: CardScanSheetResult) {
+        when (result) {
+            is CardScanSheetResult.Completed ->
+                viewBinding.scanResultText.text = result.scannedCard.pan
+
+            is CardScanSheetResult.Canceled ->
+                viewBinding.scanResultText.text = result.reason.toString()
+
+            is CardScanSheetResult.Failed ->
+                viewBinding.scanResultText.text = result.error.message
+        }
+    }
+}

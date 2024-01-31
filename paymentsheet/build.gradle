@@ -1,0 +1,152 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'app.cash.paparazzi'
+
+dependencies {
+    implementation project(":link")
+    api project(":payments-core")
+    implementation project(':payments-ui-core')
+    implementation project(':stripe-ui-core')
+    compileOnly project(':financial-connections')
+
+    // Kotlin
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.serialization
+
+    // AndroidX
+    implementation libs.androidx.activity
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+
+    // DI
+    implementation libs.dagger
+    ksp libs.daggerCompiler
+
+    // Compose
+    implementation libs.compose.ui
+    implementation libs.compose.uiViewBinding
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.activity
+    implementation libs.compose.navigation
+    implementation libs.accompanist.systemUiController
+
+    // Other
+    implementation libs.playServicesWallet
+    implementation libs.payButtonCompose
+    implementation libs.material
+
+    // Tooling support (Previews, etc.)
+    implementation libs.compose.uiToolingPreview
+    debugImplementation libs.compose.uiTooling
+    debugImplementation libs.compose.uiTestManifest
+
+    testImplementation project(':link')
+    testImplementation project(':financial-connections')
+    testImplementation project(':payments-core-testing')
+
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.androidx.testRules
+    testImplementation testLibs.hamcrest
+    testImplementation testLibs.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+    testImplementation testLibs.turbine
+
+    // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
+    testImplementation testLibs.espresso.core
+
+    androidTestImplementation project(':network-testing')
+    androidTestImplementation project(':payments-core-testing')
+
+    androidTestImplementation libs.places
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation (testLibs.espresso.contrib) {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    androidTestImplementation testLibs.mockito.core
+    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation testLibs.testParameterInjector
+    androidTestImplementation testLibs.truth
+
+    androidTestUtil testLibs.testOrchestrator
+}
+
+android {
+    defaultConfig {
+        testApplicationId "com.stripe.android.paymentsheet.test"
+    }
+
+    buildFeatures {
+        compose = true
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
+        if (gradle.ext.isCi) {
+            kotlinOptions.allWarningsAsErrors = true
+        }
+    }
+}
+
+ext {
+    artifactId = "paymentsheet"
+    artifactName = "paymentsheet"
+    artifactDescrption = "The paymentsheet module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
